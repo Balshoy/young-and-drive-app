@@ -7,7 +7,7 @@ const dbPost=(t,b,tk)=>sbFetch('/rest/v1/'+t,{method:'POST',body:JSON.stringify(
 const dbDelete=(t,q,tk)=>sbFetch('/rest/v1/'+t+'?'+q,{method:'DELETE'},tk);
 const C={bg:'#0d0d0d',surface:'#141414',card:'#1c1c1c',border:'#272727',accent:'#e8420a',text:'#f0f0f0',muted:'#666'};
 const TAGS={Tuning:'#e8420a',Actualites:'#1976d2',MeetUp:'#2e7d32',Circuit:'#7b1fa2',Electrique:'#0097a7'};
-const CATS=['Toutes','Tuning','Actualites','Electrique','Circuit','MeetUp'];
+const CATS=['Toutes','Tuning','Actualites','Electrique','Cirhcuit','MeetUp'];
 const ago=ts=>{const d=(Date.now()-new Date(ts))/1e3;if(d<60)return'maintenant';if(d<3600)return~~(d/60)+'min';if(d<86400)return~~(d/3600)+'h';return~~(d/86400)+'j'};
 function Av({name,size=32}){return <div style={{width:size,height:size,borderRadius:'50%',background:'#2a1a14',display:'flex',alignItems:'center',justifyContent:'center',fontSize:size*.38,fontWeight:700,color:C.accent,flexShrink:0}}>{(name||'?').substring(0,2).toUpperCase()}</div>}
 function Tag({label}){const col=TAGS[label]||C.accent;return <span style={{background:col+'22',color:col,fontSize:11,fontWeight:600,padding:'2px 10px',borderRadius:20}}>{label}</span>}
@@ -115,9 +115,9 @@ function Profil({session,onLogout}){
       </div>
     </div>
   </div>)
-}
+  const [session,setSession]=useState(()=>{try{const s=localStorage.getItem('yd_session');return s?JSON.parse(s):null}catch{return null}}),[tab,setTab]=useState('feed');
 export default function App(){
-  const [session,setSession]=useState(null),[tab,setTab]=useState('feed');
+    if(!session)return <AuthScreen onAuth={s=>{localStorage.setItem('yd_session',JSON.stringify(s));setSession(s)}}/>
   const username=session&&session.user&&session.user.email&&session.user.email.split('@')[0];
   const nav=[{id:'feed',label:'Feed'},{id:'meetup',label:'Meet Up'},{id:'profil',label:'Mon profil'}];
   if(!session)return <AuthScreen onAuth={setSession}/>;
@@ -130,7 +130,7 @@ export default function App(){
       </div>
     </div>
     <div style={{maxWidth:1200,margin:'0 auto',padding:'32px'}}>
-      {tab==='feed'&&<Feed session={session}/>}
+{tab==='profil'&&<Profil session={session} onLogout={()=>{localStorage.removeItem('yd_session');setSession(null)}}/>}
       {tab==='meetup'&&<MeetUp session={session}/>}
       {tab==='profil'&&<Profil session={session} onLogout={()=>setSession(null)}/>}
     </div>
